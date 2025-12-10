@@ -109,7 +109,18 @@ function Editor({ template, onBack }) {
           
           {isAstrology && (
             <div className="control-group">
-              <span className="control-label">Current Cosmic Energy</span>
+              <span className="control-label">Closest Planet to Earth</span>
+              <div className="planet-display">
+                <div className="planet-header">
+                  <span className="planet-symbol">{astroData.closestPlanet?.symbol}</span>
+                  <span className="planet-name">{astroData.closestPlanet?.name}</span>
+                  <span className="planet-distance">~{astroData.closestPlanet?.currentDistance}M km</span>
+                </div>
+                <p className="planet-description">{astroData.closestPlanet?.description}</p>
+                <p className="planet-influence">✨ {astroData.closestPlanet?.influence}</p>
+              </div>
+              
+              <span className="control-label" style={{marginTop: '16px'}}>Moon Phase</span>
               <div className="astro-display">
                 <div className="astro-main">
                   <span className="astro-phase">{astroData.moonPhase}</span>

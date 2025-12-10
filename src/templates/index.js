@@ -431,6 +431,7 @@ export const templates = [
     render: (ctx, text, palette, lotteryNumbers, astroData) => {
       const size = 1080;
       const data = astroData || getAstrologyData();
+      const planet = data.closestPlanet;
       
       // Deep space gradient background
       const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size * 0.8);
@@ -452,34 +453,46 @@ export const templates = [
       }
       ctx.globalAlpha = 1;
       
-      // Title text
-      ctx.fillStyle = palette.text;
-      ctx.font = `400 italic 52px "Playfair Display", serif`;
+      // === CLOSEST PLANET SECTION (TOP) ===
+      // Draw the closest planet
+      const planetY = 200;
+      const planetRadius = planet.key === 'saturn' ? 65 : 80;
+      drawPlanet(ctx, size / 2, planetY, planetRadius, planet, palette);
+      
+      // Planet name and symbol
+      ctx.fillStyle = palette.accent;
+      ctx.font = `700 36px "Space Grotesk", sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(text || '✨ Daily Cosmic Energy ✨', size / 2, 120);
+      ctx.fillText(`${planet.symbol} ${planet.name.toUpperCase()} ${planet.symbol}`, size / 2, planetY + planetRadius + 50);
       
-      // Decorative line
-      ctx.strokeStyle = palette.accent;
-      ctx.lineWidth = 1;
-      ctx.globalAlpha = 0.5;
-      ctx.beginPath();
-      ctx.moveTo(size * 0.2, 180);
-      ctx.lineTo(size * 0.8, 180);
-      ctx.stroke();
+      // "Closest to Earth" label
+      ctx.fillStyle = palette.text;
+      ctx.font = `500 24px "Inter", sans-serif`;
+      ctx.fillText('Closest Planet to Earth Right Now', size / 2, planetY + planetRadius + 90);
+      
+      // Distance info
+      ctx.globalAlpha = 0.7;
+      ctx.font = `400 20px "Inter", sans-serif`;
+      ctx.fillText(`~${planet.currentDistance} million km away`, size / 2, planetY + planetRadius + 120);
       ctx.globalAlpha = 1;
       
-      // Draw moon phase in center
-      const moonY = size * 0.38;
-      const moonRadius = 120;
+      // Title text (user's custom text)
+      ctx.fillStyle = palette.text;
+      ctx.font = `400 italic 42px "Playfair Display", serif`;
+      ctx.fillText(text || '✨ Daily Cosmic Energy ✨', size / 2, planetY + planetRadius + 175);
+      
+      // === MOON PHASE SECTION (MIDDLE) ===
+      const moonY = size * 0.56;
+      const moonRadius = 90;
       
       // Moon glow
-      const glowGradient = ctx.createRadialGradient(size/2, moonY, moonRadius * 0.8, size/2, moonY, moonRadius * 2);
-      glowGradient.addColorStop(0, `${palette.accent}40`);
+      const glowGradient = ctx.createRadialGradient(size/2, moonY, moonRadius * 0.8, size/2, moonY, moonRadius * 1.8);
+      glowGradient.addColorStop(0, `${palette.accent}30`);
       glowGradient.addColorStop(1, 'transparent');
       ctx.fillStyle = glowGradient;
       ctx.beginPath();
-      ctx.arc(size/2, moonY, moonRadius * 2, 0, Math.PI * 2);
+      ctx.arc(size/2, moonY, moonRadius * 1.8, 0, Math.PI * 2);
       ctx.fill();
       
       // Draw the moon based on phase
@@ -487,43 +500,49 @@ export const templates = [
       
       // Moon phase name
       ctx.fillStyle = palette.accent;
-      ctx.font = `700 42px "Space Grotesk", sans-serif`;
-      ctx.fillText(data.moonPhase, size / 2, moonY + moonRadius + 60);
+      ctx.font = `700 32px "Space Grotesk", sans-serif`;
+      ctx.fillText(data.moonPhase, size / 2, moonY + moonRadius + 45);
       
       // Moon sign
       ctx.fillStyle = palette.text;
-      ctx.font = `400 32px "Inter", sans-serif`;
-      ctx.fillText(`Moon in ${data.moonSign}`, size / 2, moonY + moonRadius + 110);
+      ctx.font = `400 24px "Inter", sans-serif`;
+      ctx.fillText(`Moon in ${data.moonSign}`, size / 2, moonY + moonRadius + 80);
       
-      // Astrological info box at bottom
-      const boxY = size - 280;
-      const boxHeight = 200;
-      const boxPadding = 60;
+      // === PLANETARY INFLUENCE BOX (BOTTOM) ===
+      const boxY = size - 250;
+      const boxHeight = 180;
+      const boxPadding = 50;
       
       // Semi-transparent box
-      ctx.fillStyle = `${palette.background}cc`;
+      ctx.fillStyle = `${palette.background}dd`;
       ctx.fillRect(boxPadding, boxY, size - boxPadding * 2, boxHeight);
-      ctx.strokeStyle = palette.accent;
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = planet.color1;
+      ctx.lineWidth = 2;
       ctx.strokeRect(boxPadding, boxY, size - boxPadding * 2, boxHeight);
       
-      // Astrological details
-      ctx.fillStyle = palette.accent;
-      ctx.font = `600 24px "Space Grotesk", sans-serif`;
+      // Planet influence header
+      ctx.fillStyle = planet.color1;
+      ctx.font = `600 22px "Space Grotesk", sans-serif`;
       ctx.textAlign = 'left';
-      ctx.fillText('CURRENT ALIGNMENTS', boxPadding + 30, boxY + 40);
+      ctx.fillText(`${planet.symbol} ${planet.name.toUpperCase()} INFLUENCE`, boxPadding + 25, boxY + 35);
       
+      // Influence description (wrapped)
       ctx.fillStyle = palette.text;
-      ctx.font = `400 26px "Inter", sans-serif`;
-      ctx.fillText(`☉ Sun in ${data.sunSign}`, boxPadding + 30, boxY + 85);
-      ctx.fillText(`☿ Mercury ${data.mercuryStatus}`, boxPadding + 30, boxY + 125);
-      ctx.fillText(`♀ Venus in ${data.venusSign}`, boxPadding + 30, boxY + 165);
+      ctx.font = `400 22px "Inter", sans-serif`;
+      const descLines = wrapText(ctx, planet.influence, size - boxPadding * 2 - 50);
+      descLines.forEach((line, i) => {
+        ctx.fillText(line, boxPadding + 25, boxY + 75 + i * 30);
+      });
       
-      // Right column
+      // Date and alignments row
+      ctx.fillStyle = palette.text;
+      ctx.globalAlpha = 0.7;
+      ctx.font = `400 18px "Inter", sans-serif`;
+      ctx.textAlign = 'left';
+      ctx.fillText(`☉ ${data.sunSign}  •  ☿ ${data.mercuryStatus}  •  ${data.element}`, boxPadding + 25, boxY + boxHeight - 25);
       ctx.textAlign = 'right';
-      ctx.fillText(`${data.element} Energy`, size - boxPadding - 30, boxY + 85);
-      ctx.fillText(`${data.quality} Moon`, size - boxPadding - 30, boxY + 125);
-      ctx.fillText(data.date, size - boxPadding - 30, boxY + 165);
+      ctx.fillText(data.date, size - boxPadding - 25, boxY + boxHeight - 25);
+      ctx.globalAlpha = 1;
       
       ctx.textAlign = 'center';
     }
@@ -655,6 +674,9 @@ export function getAstrologyData(date = new Date()) {
     year: 'numeric' 
   });
   
+  // Calculate closest planet to Earth
+  const closestPlanet = getClosestPlanet(date);
+  
   return {
     moonPhase,
     phaseValue,
@@ -664,8 +686,112 @@ export function getAstrologyData(date = new Date()) {
     mercuryStatus,
     element,
     quality,
-    date: dateStr
+    date: dateStr,
+    closestPlanet
   };
+}
+
+// Calculate which planet is closest to Earth
+function getClosestPlanet(date) {
+  const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+  const year = date.getFullYear();
+  
+  // Planetary orbital periods (in Earth days) and average distances
+  // Using simplified calculations based on synodic periods
+  const planets = {
+    mercury: {
+      name: 'Mercury',
+      symbol: '☿',
+      synodicPeriod: 116, // Days between closest approaches
+      minDistance: 77, // Million km at closest
+      maxDistance: 222,
+      color1: '#8c8c8c',
+      color2: '#5a5a5a',
+      description: 'The swift messenger planet races between Earth and Sun, bringing heightened communication and mental clarity.',
+      influence: 'Communication, intellect, and quick thinking are amplified.'
+    },
+    venus: {
+      name: 'Venus',
+      symbol: '♀',
+      synodicPeriod: 584,
+      minDistance: 38, // Closest planet to Earth at its nearest
+      maxDistance: 261,
+      color1: '#e6c35c',
+      color2: '#c4a24a',
+      description: 'The planet of love and beauty draws near, amplifying matters of the heart and artistic inspiration.',
+      influence: 'Love, beauty, harmony, and creativity are heightened.'
+    },
+    mars: {
+      name: 'Mars',
+      symbol: '♂',
+      synodicPeriod: 780,
+      minDistance: 55,
+      maxDistance: 401,
+      color1: '#e07850',
+      color2: '#a85a3c',
+      description: 'The red warrior planet approaches, igniting passion, courage, and the drive to take action.',
+      influence: 'Energy, ambition, courage, and determination surge.'
+    },
+    jupiter: {
+      name: 'Jupiter',
+      symbol: '♃',
+      synodicPeriod: 399,
+      minDistance: 588,
+      maxDistance: 968,
+      color1: '#d4a574',
+      color2: '#c49464',
+      description: 'The great benefic giant looms closer, expanding opportunities and bringing wisdom from afar.',
+      influence: 'Luck, expansion, wisdom, and abundance flow freely.'
+    },
+    saturn: {
+      name: 'Saturn',
+      symbol: '♄',
+      synodicPeriod: 378,
+      minDistance: 1195,
+      maxDistance: 1658,
+      color1: '#c9b896',
+      color2: '#a89878',
+      hasRings: true,
+      description: 'The ringed taskmaster draws near, demanding discipline and rewarding perseverance.',
+      influence: 'Structure, responsibility, and karmic lessons are emphasized.'
+    }
+  };
+  
+  // Calculate approximate current distance for each planet
+  // Using simplified sinusoidal model based on synodic period
+  let closest = null;
+  let minDist = Infinity;
+  
+  // Reference dates for planetary oppositions/conjunctions (approximate)
+  const references = {
+    mercury: new Date('2024-01-15'),
+    venus: new Date('2024-06-04'),
+    mars: new Date('2025-01-16'),
+    jupiter: new Date('2024-12-07'),
+    saturn: new Date('2024-09-08')
+  };
+  
+  for (const [key, planet] of Object.entries(planets)) {
+    const refDate = references[key];
+    const daysSinceRef = (date - refDate) / (1000 * 60 * 60 * 24);
+    const phase = (daysSinceRef % planet.synodicPeriod) / planet.synodicPeriod;
+    
+    // Distance varies sinusoidally between min and max
+    const distRange = planet.maxDistance - planet.minDistance;
+    const currentDist = planet.minDistance + (distRange / 2) * (1 - Math.cos(phase * 2 * Math.PI));
+    
+    if (currentDist < minDist) {
+      minDist = currentDist;
+      closest = {
+        ...planet,
+        key,
+        currentDistance: Math.round(currentDist),
+        phase
+      };
+    }
+  }
+  
+  return closest;
 }
 
 // Get sun sign based on date
@@ -747,6 +873,120 @@ function drawMoon(ctx, x, y, radius, phaseValue, palette) {
   ctx.arc(x, y, radius + 3, 0, Math.PI * 2);
   ctx.stroke();
   ctx.globalAlpha = 1;
+}
+
+// Draw a planet
+function drawPlanet(ctx, x, y, radius, planet, palette) {
+  // Planet glow
+  const glowGradient = ctx.createRadialGradient(x, y, radius * 0.8, x, y, radius * 1.8);
+  glowGradient.addColorStop(0, `${planet.color1}60`);
+  glowGradient.addColorStop(1, 'transparent');
+  ctx.fillStyle = glowGradient;
+  ctx.beginPath();
+  ctx.arc(x, y, radius * 1.8, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Planet body gradient
+  const bodyGradient = ctx.createRadialGradient(x - radius * 0.3, y - radius * 0.3, 0, x, y, radius);
+  bodyGradient.addColorStop(0, shadeColor(planet.color1, 30));
+  bodyGradient.addColorStop(0.5, planet.color1);
+  bodyGradient.addColorStop(1, planet.color2);
+  
+  ctx.fillStyle = bodyGradient;
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Planet-specific features
+  if (planet.key === 'jupiter') {
+    // Jupiter's bands
+    ctx.strokeStyle = shadeColor(planet.color2, -20);
+    ctx.lineWidth = 4;
+    ctx.globalAlpha = 0.4;
+    for (let i = -2; i <= 2; i++) {
+      if (i === 0) continue;
+      ctx.beginPath();
+      ctx.ellipse(x, y + i * radius * 0.25, radius * 0.95, radius * 0.1, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    // Great Red Spot
+    ctx.fillStyle = '#c45030';
+    ctx.globalAlpha = 0.6;
+    ctx.beginPath();
+    ctx.ellipse(x + radius * 0.3, y + radius * 0.2, radius * 0.2, radius * 0.12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  } else if (planet.key === 'saturn') {
+    // Saturn's rings
+    ctx.strokeStyle = '#d4c4a8';
+    ctx.lineWidth = 12;
+    ctx.globalAlpha = 0.7;
+    ctx.beginPath();
+    ctx.ellipse(x, y, radius * 1.8, radius * 0.4, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.strokeStyle = '#c4b498';
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.ellipse(x, y, radius * 1.5, radius * 0.33, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    // Redraw front of planet over rings
+    ctx.fillStyle = bodyGradient;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI);
+    ctx.fill();
+  } else if (planet.key === 'mars') {
+    // Mars surface features
+    ctx.fillStyle = shadeColor(planet.color2, -15);
+    ctx.globalAlpha = 0.4;
+    ctx.beginPath();
+    ctx.arc(x - radius * 0.2, y - radius * 0.1, radius * 0.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x + radius * 0.3, y + radius * 0.3, radius * 0.2, 0, Math.PI * 2);
+    ctx.fill();
+    // Polar cap
+    ctx.fillStyle = '#ffffff';
+    ctx.globalAlpha = 0.5;
+    ctx.beginPath();
+    ctx.ellipse(x, y - radius * 0.85, radius * 0.3, radius * 0.1, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  } else if (planet.key === 'venus') {
+    // Venus cloud swirls
+    ctx.strokeStyle = shadeColor(planet.color1, 20);
+    ctx.lineWidth = 3;
+    ctx.globalAlpha = 0.3;
+    ctx.beginPath();
+    ctx.arc(x - radius * 0.2, y, radius * 0.5, 0, Math.PI);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x + radius * 0.3, y - radius * 0.2, radius * 0.4, Math.PI, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  } else if (planet.key === 'mercury') {
+    // Mercury craters
+    ctx.fillStyle = shadeColor(planet.color2, -20);
+    ctx.globalAlpha = 0.4;
+    const craters = [
+      { x: -0.3, y: -0.2, r: 0.15 },
+      { x: 0.2, y: 0.3, r: 0.2 },
+      { x: -0.1, y: 0.4, r: 0.1 },
+      { x: 0.35, y: -0.1, r: 0.12 },
+    ];
+    craters.forEach(c => {
+      ctx.beginPath();
+      ctx.arc(x + c.x * radius, y + c.y * radius, c.r * radius, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+  }
+  
+  // Subtle highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.beginPath();
+  ctx.ellipse(x - radius * 0.3, y - radius * 0.3, radius * 0.4, radius * 0.3, -Math.PI / 4, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 export default templates;

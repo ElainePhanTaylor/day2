@@ -377,6 +377,58 @@ body {
   filter: brightness(1.15);
 }
 
+/* Planet Display */
+.planet-display {
+  background: linear-gradient(135deg, #0a1628 0%, #1a0a2e 100%);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  border: 1px solid #64b5f633;
+}
+
+.planet-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.planet-symbol {
+  font-size: 2rem;
+  color: #c9b037;
+}
+
+.planet-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.planet-distance {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.planet-description {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: var(--spacing-sm) 0;
+  font-style: italic;
+}
+
+.planet-influence {
+  font-size: 0.875rem;
+  color: #c9b037;
+  line-height: 1.4;
+  margin: 0;
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
 /* Palette Options */
 .palette-options {
   display: flex;
