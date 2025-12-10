@@ -746,13 +746,6 @@ export const templates = [
         tagX += tagWidth + 12;
       });
       
-      // Footer
-      ctx.fillStyle = palette.text;
-      ctx.globalAlpha = 0.4;
-      ctx.font = `400 18px "Inter", sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.fillText('Stay ahead of the conversation', size / 2, size - 50);
-      ctx.globalAlpha = 1;
     }
   }
 ];
