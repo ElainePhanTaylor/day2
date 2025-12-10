@@ -453,95 +453,115 @@ export const templates = [
       }
       ctx.globalAlpha = 1;
       
-      // === CLOSEST PLANET SECTION (TOP) ===
-      // Draw the closest planet
-      const planetY = 200;
-      const planetRadius = planet.key === 'saturn' ? 65 : 80;
-      drawPlanet(ctx, size / 2, planetY, planetRadius, planet, palette);
-      
-      // Planet name and symbol
-      ctx.fillStyle = palette.accent;
-      ctx.font = `700 36px "Space Grotesk", sans-serif`;
+      // === USER TEXT SECTION (TOP) ===
+      ctx.fillStyle = palette.text;
+      ctx.font = `400 italic 56px "Playfair Display", serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(`${planet.symbol} ${planet.name.toUpperCase()} ${planet.symbol}`, size / 2, planetY + planetRadius + 50);
       
-      // "Closest to Earth" label
-      ctx.fillStyle = palette.text;
-      ctx.font = `500 24px "Inter", sans-serif`;
-      ctx.fillText('Closest Planet to Earth Right Now', size / 2, planetY + planetRadius + 90);
+      // Wrap user text if needed
+      const userText = text || '✨ Your Cosmic Message ✨';
+      const textLines = wrapText(ctx, userText, size - 120);
+      const lineHeight = 70;
+      const textStartY = 140;
       
-      // Distance info
-      ctx.globalAlpha = 0.7;
-      ctx.font = `400 20px "Inter", sans-serif`;
-      ctx.fillText(`~${planet.currentDistance} million km away`, size / 2, planetY + planetRadius + 120);
+      textLines.forEach((line, i) => {
+        ctx.fillText(line, size / 2, textStartY + i * lineHeight);
+      });
+      
+      // Decorative line under text
+      const textEndY = textStartY + (textLines.length - 1) * lineHeight + 50;
+      ctx.strokeStyle = palette.accent;
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(size * 0.2, textEndY);
+      ctx.lineTo(size * 0.8, textEndY);
+      ctx.stroke();
       ctx.globalAlpha = 1;
       
-      // Title text (user's custom text)
-      ctx.fillStyle = palette.text;
-      ctx.font = `400 italic 42px "Playfair Display", serif`;
-      ctx.fillText(text || '✨ Daily Cosmic Energy ✨', size / 2, planetY + planetRadius + 175);
+      // === PLANET & MOON SIDE BY SIDE (MIDDLE) ===
+      const celestialY = size * 0.48;
+      const planetX = size * 0.3;
+      const moonX = size * 0.7;
       
-      // === MOON PHASE SECTION (MIDDLE) ===
-      const moonY = size * 0.56;
-      const moonRadius = 90;
+      // Draw Planet (left side)
+      const planetRadius = planet.key === 'saturn' ? 55 : 70;
+      drawPlanet(ctx, planetX, celestialY, planetRadius, planet, palette);
+      
+      // Planet label
+      ctx.fillStyle = palette.accent;
+      ctx.font = `700 28px "Space Grotesk", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText(`${planet.symbol} ${planet.name}`, planetX, celestialY + planetRadius + 45);
+      
+      ctx.fillStyle = palette.text;
+      ctx.font = `400 18px "Inter", sans-serif`;
+      ctx.globalAlpha = 0.8;
+      ctx.fillText('Closest to Earth', planetX, celestialY + planetRadius + 75);
+      ctx.fillText(`${planet.currentDistance}M km`, planetX, celestialY + planetRadius + 100);
+      ctx.globalAlpha = 1;
+      
+      // Draw Moon (right side)
+      const moonRadius = 70;
       
       // Moon glow
-      const glowGradient = ctx.createRadialGradient(size/2, moonY, moonRadius * 0.8, size/2, moonY, moonRadius * 1.8);
-      glowGradient.addColorStop(0, `${palette.accent}30`);
+      const glowGradient = ctx.createRadialGradient(moonX, celestialY, moonRadius * 0.8, moonX, celestialY, moonRadius * 1.6);
+      glowGradient.addColorStop(0, `${palette.accent}25`);
       glowGradient.addColorStop(1, 'transparent');
       ctx.fillStyle = glowGradient;
       ctx.beginPath();
-      ctx.arc(size/2, moonY, moonRadius * 1.8, 0, Math.PI * 2);
+      ctx.arc(moonX, celestialY, moonRadius * 1.6, 0, Math.PI * 2);
       ctx.fill();
       
-      // Draw the moon based on phase
-      drawMoon(ctx, size/2, moonY, moonRadius, data.phaseValue, palette);
+      drawMoon(ctx, moonX, celestialY, moonRadius, data.phaseValue, palette);
       
-      // Moon phase name
+      // Moon label
       ctx.fillStyle = palette.accent;
-      ctx.font = `700 32px "Space Grotesk", sans-serif`;
-      ctx.fillText(data.moonPhase, size / 2, moonY + moonRadius + 45);
+      ctx.font = `700 28px "Space Grotesk", sans-serif`;
+      ctx.fillText(data.moonPhase, moonX, celestialY + moonRadius + 45);
       
-      // Moon sign
       ctx.fillStyle = palette.text;
-      ctx.font = `400 24px "Inter", sans-serif`;
-      ctx.fillText(`Moon in ${data.moonSign}`, size / 2, moonY + moonRadius + 80);
+      ctx.font = `400 18px "Inter", sans-serif`;
+      ctx.globalAlpha = 0.8;
+      ctx.fillText(`Moon in ${data.moonSign}`, moonX, celestialY + moonRadius + 75);
+      ctx.fillText(`${data.quality} Energy`, moonX, celestialY + moonRadius + 100);
+      ctx.globalAlpha = 1;
       
       // === PLANETARY INFLUENCE BOX (BOTTOM) ===
-      const boxY = size - 250;
-      const boxHeight = 180;
+      const boxY = size - 230;
+      const boxHeight = 165;
       const boxPadding = 50;
       
       // Semi-transparent box
       ctx.fillStyle = `${palette.background}dd`;
       ctx.fillRect(boxPadding, boxY, size - boxPadding * 2, boxHeight);
-      ctx.strokeStyle = planet.color1;
+      ctx.strokeStyle = palette.accent;
       ctx.lineWidth = 2;
       ctx.strokeRect(boxPadding, boxY, size - boxPadding * 2, boxHeight);
       
-      // Planet influence header
-      ctx.fillStyle = planet.color1;
-      ctx.font = `600 22px "Space Grotesk", sans-serif`;
+      // Influence header
+      ctx.fillStyle = palette.accent;
+      ctx.font = `600 20px "Space Grotesk", sans-serif`;
       ctx.textAlign = 'left';
-      ctx.fillText(`${planet.symbol} ${planet.name.toUpperCase()} INFLUENCE`, boxPadding + 25, boxY + 35);
+      ctx.fillText(`${planet.symbol} ${planet.name.toUpperCase()} INFLUENCE`, boxPadding + 25, boxY + 32);
       
       // Influence description (wrapped)
       ctx.fillStyle = palette.text;
-      ctx.font = `400 22px "Inter", sans-serif`;
+      ctx.font = `400 20px "Inter", sans-serif`;
       const descLines = wrapText(ctx, planet.influence, size - boxPadding * 2 - 50);
       descLines.forEach((line, i) => {
-        ctx.fillText(line, boxPadding + 25, boxY + 75 + i * 30);
+        ctx.fillText(line, boxPadding + 25, boxY + 65 + i * 28);
       });
       
       // Date and alignments row
       ctx.fillStyle = palette.text;
-      ctx.globalAlpha = 0.7;
-      ctx.font = `400 18px "Inter", sans-serif`;
+      ctx.globalAlpha = 0.6;
+      ctx.font = `400 16px "Inter", sans-serif`;
       ctx.textAlign = 'left';
-      ctx.fillText(`☉ ${data.sunSign}  •  ☿ ${data.mercuryStatus}  •  ${data.element}`, boxPadding + 25, boxY + boxHeight - 25);
+      ctx.fillText(`☉ ${data.sunSign}  •  ☿ ${data.mercuryStatus}  •  ${data.element}`, boxPadding + 25, boxY + boxHeight - 20);
       ctx.textAlign = 'right';
-      ctx.fillText(data.date, size - boxPadding - 25, boxY + boxHeight - 25);
+      ctx.fillText(data.date, size - boxPadding - 25, boxY + boxHeight - 20);
       ctx.globalAlpha = 1;
       
       ctx.textAlign = 'center';

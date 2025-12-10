@@ -165,10 +165,13 @@ function Editor({ template, onBack }) {
             </div>
           )}
           
-          {isTrending && (
+          {isTrending && (() => {
+            const currentPalette = template.palettes[paletteIndex];
+            const accentColor = currentPalette.accent;
+            return (
             <div className="control-group">
               <span className="control-label">Live Trending Data</span>
-              <div className="trending-display">
+              <div className="trending-display" style={{ borderColor: `${accentColor}33` }}>
                 {isLoadingTrends ? (
                   <div className="trending-loading">
                     <span className="spinner"></span>
@@ -177,13 +180,13 @@ function Editor({ template, onBack }) {
                 ) : trendingData ? (
                   <>
                     <div className="trending-header">
-                      <span className="trending-source">📈 {trendingData.source}</span>
+                      <span className="trending-source" style={{ color: accentColor }}>📈 {trendingData.source}</span>
                       <span className="trending-time">Updated {trendingData.timestamp}</span>
                     </div>
                     <div className="trending-list">
                       {trendingData.searches?.map((search, i) => (
                         <div key={i} className="trending-item">
-                          <span className="trending-rank">{i + 1}</span>
+                          <span className="trending-rank" style={{ background: accentColor }}>{i + 1}</span>
                           <span className="trending-text">{search}</span>
                         </div>
                       ))}
@@ -192,7 +195,15 @@ function Editor({ template, onBack }) {
                       <span className="control-label">Power Words</span>
                       <div className="power-tags">
                         {trendingData.powerWords?.map((word, i) => (
-                          <span key={i} className="power-tag">{word}</span>
+                          <span 
+                            key={i} 
+                            className="power-tag"
+                            style={{ 
+                              color: accentColor, 
+                              background: `${accentColor}20`,
+                              borderColor: `${accentColor}40`
+                            }}
+                          >{word}</span>
                         ))}
                       </div>
                     </div>
@@ -205,6 +216,7 @@ function Editor({ template, onBack }) {
                 className="generate-button trending-button" 
                 onClick={loadTrendingData}
                 disabled={isLoadingTrends}
+                style={{ background: `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}dd 100%)` }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M23 4v6h-6M1 20v-6h6"/>
@@ -213,7 +225,8 @@ function Editor({ template, onBack }) {
                 {isLoadingTrends ? 'Loading...' : 'Refresh Trends'}
               </button>
             </div>
-          )}
+            );
+          })()}
           
           {!isTrending && (
             <div className="control-group">
