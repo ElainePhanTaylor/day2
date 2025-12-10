@@ -747,6 +747,275 @@ export const templates = [
       });
       
     }
+  },
+  {
+    id: 'affirmation',
+    name: 'Daily Affirmation',
+    font: 'Playfair Display',
+    fontWeight: 400,
+    fontSize: 48,
+    textAlign: 'center',
+    isAffirmation: true,
+    palettes: [
+      { name: 'Sunrise', background: '#ff9a9e', accent: '#fecfef', text: '#ffffff' },
+      { name: 'Ocean', background: '#667eea', accent: '#764ba2', text: '#ffffff' },
+      { name: 'Forest', background: '#11998e', accent: '#38ef7d', text: '#ffffff' },
+    ],
+    render: (ctx, text, palette, lotteryNumbers, astroData, trendingData, extraData) => {
+      const size = 1080;
+      const affirmation = extraData?.affirmation || getRandomAffirmation();
+      
+      // Beautiful gradient background
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, palette.background);
+      gradient.addColorStop(1, palette.accent);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+      
+      // Soft overlay circles
+      ctx.globalAlpha = 0.1;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(size * 0.1, size * 0.2, 300, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(size * 0.9, size * 0.8, 350, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(size * 0.5, size * 0.1, 200, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      
+      // User title at top
+      ctx.fillStyle = palette.text;
+      ctx.font = `600 32px "Space Grotesk", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.globalAlpha = 0.9;
+      ctx.fillText(text || '✨ Daily Affirmation ✨', size / 2, 120);
+      ctx.globalAlpha = 1;
+      
+      // Main affirmation quote
+      ctx.fillStyle = palette.text;
+      ctx.font = `400 italic 54px "Playfair Display", serif`;
+      
+      const quoteLines = wrapText(ctx, `"${affirmation}"`, size - 140);
+      const lineHeight = 75;
+      const startY = size / 2 - ((quoteLines.length - 1) * lineHeight) / 2;
+      
+      quoteLines.forEach((line, i) => {
+        ctx.fillText(line, size / 2, startY + i * lineHeight);
+      });
+      
+      // Decorative elements
+      ctx.strokeStyle = palette.text;
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.4;
+      ctx.beginPath();
+      ctx.moveTo(size * 0.3, startY - 80);
+      ctx.lineTo(size * 0.7, startY - 80);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(size * 0.3, startY + (quoteLines.length - 1) * lineHeight + 80);
+      ctx.lineTo(size * 0.7, startY + (quoteLines.length - 1) * lineHeight + 80);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      
+      // Footer
+      ctx.font = `500 24px "Inter", sans-serif`;
+      ctx.globalAlpha = 0.8;
+      const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+      ctx.fillText(today, size / 2, size - 80);
+      ctx.globalAlpha = 1;
+    }
+  },
+  {
+    id: 'countdown',
+    name: 'Countdown',
+    font: 'Space Grotesk',
+    fontWeight: 700,
+    fontSize: 120,
+    textAlign: 'center',
+    isCountdown: true,
+    palettes: [
+      { name: 'Hype', background: '#0f0f0f', accent: '#ff3366', text: '#ffffff' },
+      { name: 'Chill', background: '#1a1a2e', accent: '#00d9ff', text: '#ffffff' },
+      { name: 'Gold', background: '#1a1510', accent: '#ffd700', text: '#ffffff' },
+    ],
+    render: (ctx, text, palette, lotteryNumbers, astroData, trendingData, extraData) => {
+      const size = 1080;
+      const targetDate = extraData?.targetDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const daysLeft = Math.max(0, Math.ceil((targetDate - new Date()) / (1000 * 60 * 60 * 24)));
+      
+      // Dark background
+      ctx.fillStyle = palette.background;
+      ctx.fillRect(0, 0, size, size);
+      
+      // Radial glow behind number
+      const glowGradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size * 0.5);
+      glowGradient.addColorStop(0, `${palette.accent}30`);
+      glowGradient.addColorStop(1, 'transparent');
+      ctx.fillStyle = glowGradient;
+      ctx.fillRect(0, 0, size, size);
+      
+      // Animated lines
+      ctx.strokeStyle = palette.accent;
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.15;
+      for (let i = 0; i < 15; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, size - i * 80);
+        ctx.lineTo(size, size - i * 80 - 300);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      
+      // Event name at top
+      ctx.fillStyle = palette.text;
+      ctx.font = `600 36px "Space Grotesk", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text || '🎉 BIG EVENT 🎉', size / 2, 140);
+      
+      // "Days Until" label
+      ctx.fillStyle = palette.accent;
+      ctx.font = `500 28px "Inter", sans-serif`;
+      ctx.fillText('DAYS UNTIL', size / 2, size * 0.35);
+      
+      // Big number
+      ctx.fillStyle = palette.text;
+      ctx.font = `700 220px "Space Grotesk", sans-serif`;
+      ctx.fillText(daysLeft.toString(), size / 2, size / 2 + 30);
+      
+      // Accent underline
+      ctx.fillStyle = palette.accent;
+      ctx.fillRect(size * 0.3, size * 0.68, size * 0.4, 6);
+      
+      // Target date
+      ctx.fillStyle = palette.text;
+      ctx.font = `400 28px "Inter", sans-serif`;
+      ctx.globalAlpha = 0.7;
+      const dateStr = targetDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      ctx.fillText(dateStr, size / 2, size * 0.78);
+      ctx.globalAlpha = 1;
+      
+      // Urgency message
+      ctx.fillStyle = palette.accent;
+      ctx.font = `600 32px "Space Grotesk", sans-serif`;
+      const urgency = daysLeft === 0 ? "🔥 TODAY'S THE DAY! 🔥" : 
+                      daysLeft === 1 ? "⚡ TOMORROW! ⚡" :
+                      daysLeft <= 7 ? "⏰ THIS WEEK!" : 
+                      daysLeft <= 30 ? "📅 COMING SOON" : "🗓️ MARK YOUR CALENDAR";
+      ctx.fillText(urgency, size / 2, size - 100);
+    }
+  },
+  {
+    id: 'thisorthat',
+    name: 'This or That',
+    font: 'Space Grotesk',
+    fontWeight: 700,
+    fontSize: 48,
+    textAlign: 'center',
+    isThisOrThat: true,
+    palettes: [
+      { name: 'Versus', background: '#1a1a1a', accent: '#ff0050', text: '#ffffff', accent2: '#00d4ff' },
+      { name: 'Fire & Ice', background: '#0f0f0f', accent: '#ff6b35', text: '#ffffff', accent2: '#4ecdc4' },
+      { name: 'Neon', background: '#0a0a0a', accent: '#f72585', text: '#ffffff', accent2: '#4cc9f0' },
+    ],
+    render: (ctx, text, palette, lotteryNumbers, astroData, trendingData, extraData) => {
+      const size = 1080;
+      const option1 = extraData?.option1 || 'COFFEE';
+      const option2 = extraData?.option2 || 'TEA';
+      const accent2 = palette.accent2 || '#00d4ff';
+      
+      // Split background
+      // Left side
+      ctx.fillStyle = palette.accent;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(size * 0.55, 0);
+      ctx.lineTo(size * 0.45, size);
+      ctx.lineTo(0, size);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Right side
+      ctx.fillStyle = accent2;
+      ctx.beginPath();
+      ctx.moveTo(size * 0.55, 0);
+      ctx.lineTo(size, 0);
+      ctx.lineTo(size, size);
+      ctx.lineTo(size * 0.45, size);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Dark diagonal stripe in middle
+      ctx.fillStyle = palette.background;
+      ctx.beginPath();
+      ctx.moveTo(size * 0.48, 0);
+      ctx.lineTo(size * 0.52, 0);
+      ctx.lineTo(size * 0.52, size);
+      ctx.lineTo(size * 0.48, size);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Title at top
+      ctx.fillStyle = palette.text;
+      ctx.font = `700 42px "Space Grotesk", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text || '🤔 THIS OR THAT? 🤔', size / 2, 100);
+      
+      // "VS" circle in center
+      ctx.fillStyle = palette.background;
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, 70, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.strokeStyle = palette.text;
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      
+      ctx.fillStyle = palette.text;
+      ctx.font = `700 48px "Space Grotesk", sans-serif`;
+      ctx.fillText('VS', size / 2, size / 2 + 5);
+      
+      // Option 1 (left)
+      ctx.fillStyle = palette.text;
+      ctx.font = `700 56px "Space Grotesk", sans-serif`;
+      ctx.textAlign = 'center';
+      
+      // Wrap option 1 text
+      ctx.save();
+      ctx.translate(size * 0.24, size / 2);
+      const opt1Lines = wrapText(ctx, option1, size * 0.35);
+      opt1Lines.forEach((line, i) => {
+        ctx.fillText(line, 0, (i - (opt1Lines.length - 1) / 2) * 70);
+      });
+      ctx.restore();
+      
+      // Option 2 (right)
+      ctx.save();
+      ctx.translate(size * 0.76, size / 2);
+      const opt2Lines = wrapText(ctx, option2, size * 0.35);
+      opt2Lines.forEach((line, i) => {
+        ctx.fillText(line, 0, (i - (opt2Lines.length - 1) / 2) * 70);
+      });
+      ctx.restore();
+      
+      // "Comment below!" footer
+      ctx.fillStyle = palette.text;
+      ctx.font = `600 32px "Inter", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.globalAlpha = 0.9;
+      ctx.fillText('👇 Comment your pick! 👇', size / 2, size - 100);
+      ctx.globalAlpha = 1;
+      
+      // Hand emojis pointing at options
+      ctx.font = `400 80px "Inter", sans-serif`;
+      ctx.fillText('👈', size * 0.24, size - 200);
+      ctx.fillText('👉', size * 0.76, size - 200);
+    }
   }
 ];
 
@@ -1188,6 +1457,34 @@ function drawPlanet(ctx, x, y, radius, planet, palette) {
   ctx.beginPath();
   ctx.ellipse(x - radius * 0.3, y - radius * 0.3, radius * 0.4, radius * 0.3, -Math.PI / 4, 0, Math.PI * 2);
   ctx.fill();
+}
+
+// Random affirmations
+const affirmations = [
+  "I am worthy of love and happiness",
+  "Today I choose joy and gratitude",
+  "I am becoming the best version of myself",
+  "My potential is limitless",
+  "I attract positive energy into my life",
+  "I am strong, capable, and resilient",
+  "Every day is a fresh start",
+  "I believe in my dreams and myself",
+  "I radiate confidence and positivity",
+  "I am grateful for this moment",
+  "I choose to focus on what I can control",
+  "My thoughts create my reality",
+  "I am deserving of success and abundance",
+  "I embrace change and growth",
+  "I am at peace with who I am",
+  "Today I will make progress, not excuses",
+  "I trust the journey of my life",
+  "I am surrounded by love and support",
+  "My voice matters and deserves to be heard",
+  "I am exactly where I need to be",
+];
+
+export function getRandomAffirmation() {
+  return affirmations[Math.floor(Math.random() * affirmations.length)];
 }
 
 // Fetch trending data from Google Trends RSS

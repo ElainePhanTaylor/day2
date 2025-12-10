@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import Canvas from './Canvas';
-import { generateLotteryNumbers, getAstrologyData, fetchTrendingData, getPowerWords } from '../templates';
+import { generateLotteryNumbers, getAstrologyData, fetchTrendingData, getPowerWords, getRandomAffirmation } from '../templates';
 
 function Editor({ template, onBack }) {
   const [text, setText] = useState('');
@@ -11,11 +11,22 @@ function Editor({ template, onBack }) {
   const [astroData, setAstroData] = useState(() => getAstrologyData());
   const [trendingData, setTrendingData] = useState(null);
   const [isLoadingTrends, setIsLoadingTrends] = useState(false);
+  const [affirmation, setAffirmation] = useState(() => getRandomAffirmation());
+  const [targetDate, setTargetDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().split('T')[0];
+  });
+  const [option1, setOption1] = useState('COFFEE');
+  const [option2, setOption2] = useState('TEA');
   const canvasRef = useRef(null);
   
   const isLottery = template.isLottery;
   const isAstrology = template.isAstrology;
   const isTrending = template.isTrending;
+  const isAffirmation = template.isAffirmation;
+  const isCountdown = template.isCountdown;
+  const isThisOrThat = template.isThisOrThat;
   
   // Fetch trending data on mount for trending template
   useEffect(() => {
@@ -110,6 +121,12 @@ function Editor({ template, onBack }) {
           lotteryNumbers={isLottery ? lotteryNumbers : null}
           astroData={isAstrology ? astroData : null}
           trendingData={isTrending ? trendingData : null}
+          extraData={{
+            affirmation: isAffirmation ? affirmation : null,
+            targetDate: isCountdown ? new Date(targetDate) : null,
+            option1: isThisOrThat ? option1 : null,
+            option2: isThisOrThat ? option2 : null,
+          }}
         />
         
         <div className="controls">
@@ -228,9 +245,64 @@ function Editor({ template, onBack }) {
             );
           })()}
           
+          {isAffirmation && (
+            <div className="control-group">
+              <span className="control-label">Today's Affirmation</span>
+              <div className="affirmation-display">
+                <p className="affirmation-text">"{affirmation}"</p>
+              </div>
+              <button className="generate-button affirmation-button" onClick={() => setAffirmation(getRandomAffirmation())}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M23 4v6h-6M1 20v-6h6"/>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+                New Affirmation
+              </button>
+            </div>
+          )}
+          
+          {isCountdown && (
+            <div className="control-group">
+              <span className="control-label">Target Date</span>
+              <input
+                type="date"
+                className="date-input"
+                value={targetDate}
+                onChange={(e) => setTargetDate(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+              />
+              <div className="countdown-preview">
+                {Math.max(0, Math.ceil((new Date(targetDate) - new Date()) / (1000 * 60 * 60 * 24)))} days to go!
+              </div>
+            </div>
+          )}
+          
+          {isThisOrThat && (
+            <div className="control-group">
+              <span className="control-label">Option 1 (Left)</span>
+              <input
+                type="text"
+                className="option-input"
+                value={option1}
+                onChange={(e) => setOption1(e.target.value.toUpperCase())}
+                placeholder="COFFEE"
+                maxLength={20}
+              />
+              <span className="control-label" style={{marginTop: '12px'}}>Option 2 (Right)</span>
+              <input
+                type="text"
+                className="option-input"
+                value={option2}
+                onChange={(e) => setOption2(e.target.value.toUpperCase())}
+                placeholder="TEA"
+                maxLength={20}
+              />
+            </div>
+          )}
+          
           <div className="control-group">
             <label htmlFor="text-input" className="control-label">
-              {isLottery ? 'Title Text' : isAstrology ? 'Title Text' : isTrending ? 'Headline' : 'Your Text'}
+              {isLottery ? 'Title Text' : isAstrology ? 'Title Text' : isTrending ? 'Headline' : isAffirmation ? 'Header' : isCountdown ? 'Event Name' : isThisOrThat ? 'Question' : 'Your Text'}
             </label>
             <textarea
               id="text-input"
@@ -238,7 +310,7 @@ function Editor({ template, onBack }) {
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder={getPlaceholderText(template)}
-              rows={isLottery || isAstrology || isTrending ? 1 : 3}
+              rows={isLottery || isAstrology || isTrending || isAffirmation || isCountdown || isThisOrThat ? 1 : 3}
             />
           </div>
           
@@ -315,6 +387,9 @@ function getPlaceholderText(template) {
     'lottery': '🍀 My Lucky Numbers 🍀',
     'astrology': '✨ Your Cosmic Message ✨',
     'trending': "What's Hot Right Now 🔥",
+    'affirmation': '✨ Daily Affirmation ✨',
+    'countdown': '🎉 BIG EVENT 🎉',
+    'thisorthat': '🤔 THIS OR THAT? 🤔',
   };
   return placeholders[template.id] || 'Your text here';
 }

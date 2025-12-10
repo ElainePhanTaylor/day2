@@ -536,6 +536,84 @@ body {
   filter: brightness(1.15);
 }
 
+/* Affirmation Styles */
+.affirmation-display {
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  text-align: center;
+}
+
+.affirmation-text {
+  font-size: 1.125rem;
+  font-style: italic;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.6;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.affirmation-button {
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+  color: #ffffff;
+}
+
+/* Countdown Styles */
+.date-input {
+  width: 100%;
+  padding: var(--spacing-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+
+.countdown-preview {
+  text-align: center;
+  padding: var(--spacing-md);
+  background: linear-gradient(135deg, #ff3366 0%, #ff6b6b 100%);
+  border-radius: var(--radius-md);
+  color: white;
+  font-weight: 600;
+  font-size: 1.25rem;
+  margin-top: var(--spacing-sm);
+}
+
+/* This or That Styles */
+.option-input {
+  width: 100%;
+  padding: var(--spacing-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.option-input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+
+.option-input:first-of-type {
+  border-color: #ff0050;
+}
+
+.option-input:last-of-type {
+  border-color: #00d4ff;
+}
+
 /* Palette Options */
 .palette-options {
   display: flex;
