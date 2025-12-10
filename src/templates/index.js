@@ -607,7 +607,7 @@ export const templates = [
     fontWeight: 700,
     fontSize: 36,
     textAlign: 'center',
-    isTrending: true, // Special flag - no text input
+    isTrending: true, // Special flag for trending data
     palettes: [
       { name: 'Viral', background: '#0f0f0f', accent: '#00d26a', text: '#ffffff' },
       { name: 'Tech', background: '#0a192f', accent: '#64ffda', text: '#ffffff' },
@@ -636,81 +636,91 @@ export const templates = [
       }
       ctx.globalAlpha = 1;
       
-      // Header section
-      ctx.fillStyle = palette.accent;
-      ctx.font = `700 28px "Space Grotesk", sans-serif`;
+      // === USER TEXT AT TOP ===
+      ctx.fillStyle = palette.text;
+      ctx.font = `700 48px "Space Grotesk", sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('📈 TRENDING NOW', size / 2, 70);
       
-      // Timestamp
+      const userText = text || "What's Hot Right Now 🔥";
+      const textLines = wrapText(ctx, userText, size - 120);
+      const lineHeight = 58;
+      const textStartY = 100;
+      
+      textLines.forEach((line, i) => {
+        ctx.fillText(line, size / 2, textStartY + i * lineHeight);
+      });
+      
+      // Timestamp under user text
+      const textEndY = textStartY + (textLines.length - 1) * lineHeight + 45;
       ctx.fillStyle = palette.text;
-      ctx.globalAlpha = 0.6;
-      ctx.font = `400 20px "Inter", sans-serif`;
-      ctx.fillText(data.source ? `${data.source} • Updated ${data.timestamp}` : '', size / 2, 110);
+      ctx.globalAlpha = 0.5;
+      ctx.font = `400 18px "Inter", sans-serif`;
+      ctx.fillText(data.source ? `${data.source} • Updated ${data.timestamp}` : '', size / 2, textEndY);
       ctx.globalAlpha = 1;
       
       // Decorative line
       ctx.strokeStyle = palette.accent;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(size * 0.15, 145);
-      ctx.lineTo(size * 0.85, 145);
+      ctx.moveTo(size * 0.15, textEndY + 30);
+      ctx.lineTo(size * 0.85, textEndY + 30);
       ctx.stroke();
       
       // === TOP SEARCHES SECTION ===
-      ctx.fillStyle = palette.text;
-      ctx.font = `600 24px "Space Grotesk", sans-serif`;
+      const searchStartY = textEndY + 70;
+      ctx.fillStyle = palette.accent;
+      ctx.font = `600 22px "Space Grotesk", sans-serif`;
       ctx.textAlign = 'left';
-      ctx.fillText('🔥 TOP SEARCHES', 80, 200);
+      ctx.fillText('🔥 TOP SEARCHES', 80, searchStartY);
       
-      // Search items
+      // Search items (compact)
       const searches = data.searches || [];
       searches.forEach((search, i) => {
-        const y = 260 + i * 85;
+        const y = searchStartY + 55 + i * 70;
         
         // Number badge
         ctx.fillStyle = palette.accent;
         ctx.beginPath();
-        ctx.roundRect(80, y - 25, 50, 50, 8);
+        ctx.roundRect(80, y - 20, 42, 42, 6);
         ctx.fill();
         
         ctx.fillStyle = palette.background;
-        ctx.font = `700 28px "Space Grotesk", sans-serif`;
+        ctx.font = `700 24px "Space Grotesk", sans-serif`;
         ctx.textAlign = 'center';
-        ctx.fillText(`${i + 1}`, 105, y + 5);
+        ctx.fillText(`${i + 1}`, 101, y + 5);
         
         // Search text
         ctx.fillStyle = palette.text;
-        ctx.font = `600 32px "Inter", sans-serif`;
+        ctx.font = `600 26px "Inter", sans-serif`;
         ctx.textAlign = 'left';
-        const displayText = search.length > 28 ? search.substring(0, 28) + '...' : search;
-        ctx.fillText(displayText, 150, y + 5);
+        const displayText = search.length > 26 ? search.substring(0, 26) + '...' : search;
+        ctx.fillText(displayText, 140, y + 5);
         
         // Trend indicator
         ctx.fillStyle = palette.accent;
-        ctx.font = `400 20px "Inter", sans-serif`;
+        ctx.font = `400 16px "Inter", sans-serif`;
         ctx.textAlign = 'right';
-        ctx.fillText('trending ↗', size - 80, y + 5);
+        ctx.fillText('↗', size - 80, y + 5);
         ctx.textAlign = 'left';
       });
       
       // === POWER WORDS SECTION ===
-      const wordsY = 720;
-      ctx.fillStyle = palette.text;
-      ctx.font = `600 24px "Space Grotesk", sans-serif`;
+      const wordsY = searchStartY + 55 + searches.length * 70 + 30;
+      ctx.fillStyle = palette.accent;
+      ctx.font = `600 22px "Space Grotesk", sans-serif`;
       ctx.textAlign = 'left';
       ctx.fillText('⚡ POWER WORDS', 80, wordsY);
       
-      // Power word tags
+      // Power word tags (compact)
       const powerWords = data.powerWords || [];
       let tagX = 80;
-      const tagY = wordsY + 60;
+      const tagY = wordsY + 50;
       
       powerWords.forEach((word, i) => {
-        ctx.font = `600 28px "Inter", sans-serif`;
+        ctx.font = `600 22px "Inter", sans-serif`;
         const metrics = ctx.measureText(word);
-        const tagWidth = metrics.width + 40;
+        const tagWidth = metrics.width + 30;
         
         // Wrap to next line if needed
         if (tagX + tagWidth > size - 80) {
@@ -720,7 +730,7 @@ export const templates = [
         // Tag background
         ctx.fillStyle = `${palette.accent}30`;
         ctx.beginPath();
-        ctx.roundRect(tagX, tagY + Math.floor(i / 4) * 60 - 18, tagWidth, 45, 22);
+        ctx.roundRect(tagX, tagY + Math.floor(i / 4) * 50 - 15, tagWidth, 38, 19);
         ctx.fill();
         
         // Tag border
@@ -731,17 +741,17 @@ export const templates = [
         // Tag text
         ctx.fillStyle = palette.accent;
         ctx.textAlign = 'center';
-        ctx.fillText(word, tagX + tagWidth / 2, tagY + Math.floor(i / 4) * 60 + 8);
+        ctx.fillText(word, tagX + tagWidth / 2, tagY + Math.floor(i / 4) * 50 + 5);
         
-        tagX += tagWidth + 15;
+        tagX += tagWidth + 12;
       });
       
       // Footer
       ctx.fillStyle = palette.text;
-      ctx.globalAlpha = 0.5;
-      ctx.font = `400 22px "Inter", sans-serif`;
+      ctx.globalAlpha = 0.4;
+      ctx.font = `400 18px "Inter", sans-serif`;
       ctx.textAlign = 'center';
-      ctx.fillText('Stay ahead of the conversation', size / 2, size - 60);
+      ctx.fillText('Stay ahead of the conversation', size / 2, size - 50);
       ctx.globalAlpha = 1;
     }
   }

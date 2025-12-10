@@ -228,21 +228,19 @@ function Editor({ template, onBack }) {
             );
           })()}
           
-          {!isTrending && (
-            <div className="control-group">
-              <label htmlFor="text-input" className="control-label">
-                {isLottery ? 'Title Text' : isAstrology ? 'Title Text' : 'Your Text'}
-              </label>
-              <textarea
-                id="text-input"
-                className="text-input"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder={getPlaceholderText(template)}
-                rows={isLottery || isAstrology ? 1 : 3}
-              />
-            </div>
-          )}
+          <div className="control-group">
+            <label htmlFor="text-input" className="control-label">
+              {isLottery ? 'Title Text' : isAstrology ? 'Title Text' : isTrending ? 'Headline' : 'Your Text'}
+            </label>
+            <textarea
+              id="text-input"
+              className="text-input"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder={getPlaceholderText(template)}
+              rows={isLottery || isAstrology || isTrending ? 1 : 3}
+            />
+          </div>
           
           <div className="control-group">
             <span className="control-label">Color Palette</span>
@@ -314,8 +312,9 @@ function getPlaceholderText(template) {
     'split': 'Your message\ngoes here\nwith style',
     'frame': 'Elegance\nin every\ndetail',
     'modern-serif': 'Beautiful\nthings await',
-    'lottery': '🍀 LUCKY NUMBERS 🍀',
-    'astrology': '✨ Daily Cosmic Energy ✨',
+    'lottery': '🍀 My Lucky Numbers 🍀',
+    'astrology': '✨ Your Cosmic Message ✨',
+    'trending': "What's Hot Right Now 🔥",
   };
   return placeholders[template.id] || 'Your text here';
 }
