@@ -556,7 +556,7 @@ export const templates = [
     textAlign: 'center',
     isTrending: true, // Special flag - no text input
     palettes: [
-      { name: 'Viral', background: '#0f0f0f', accent: '#ff0050', text: '#ffffff' },
+      { name: 'Viral', background: '#0f0f0f', accent: '#00d26a', text: '#ffffff' },
       { name: 'Tech', background: '#0a192f', accent: '#64ffda', text: '#ffffff' },
       { name: 'Bold', background: '#1a1a2e', accent: '#eab308', text: '#ffffff' },
     ],

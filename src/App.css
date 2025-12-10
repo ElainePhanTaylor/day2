@@ -434,7 +434,7 @@ body {
   background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 100%);
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
-  border: 1px solid #ff005033;
+  border: 1px solid #00d26a33;
 }
 
 .trending-loading {
@@ -457,7 +457,7 @@ body {
 
 .trending-source {
   font-weight: 600;
-  color: #ff0050;
+  color: #00d26a;
 }
 
 .trending-time {
@@ -483,7 +483,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ff0050;
+  background: #00d26a;
   color: white;
   font-size: 0.75rem;
   font-weight: 700;
@@ -515,11 +515,11 @@ body {
 .power-tag {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #ff0050;
-  background: #ff005020;
+  color: #00d26a;
+  background: #00d26a20;
   padding: 4px 10px;
   border-radius: 12px;
-  border: 1px solid #ff005040;
+  border: 1px solid #00d26a40;
 }
 
 .trending-error {
@@ -529,7 +529,7 @@ body {
 }
 
 .trending-button {
-  background: linear-gradient(135deg, #ff0050 0%, #ff4444 100%);
+  background: linear-gradient(135deg, #00d26a 0%, #00b359 100%);
 }
 
 .trending-button:hover {
