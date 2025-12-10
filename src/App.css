@@ -429,6 +429,113 @@ body {
   border-top: 1px solid rgba(255,255,255,0.1);
 }
 
+/* Trending Display */
+.trending-display {
+  background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 100%);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  border: 1px solid #ff005033;
+}
+
+.trending-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  color: var(--text-secondary);
+}
+
+.trending-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.trending-source {
+  font-weight: 600;
+  color: #ff0050;
+}
+
+.trending-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.trending-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.trending-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.trending-rank {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ff0050;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.trending-text {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trending-words {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.power-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+.power-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ff0050;
+  background: #ff005020;
+  padding: 4px 10px;
+  border-radius: 12px;
+  border: 1px solid #ff005040;
+}
+
+.trending-error {
+  text-align: center;
+  color: var(--text-muted);
+  padding: var(--spacing-md);
+}
+
+.trending-button {
+  background: linear-gradient(135deg, #ff0050 0%, #ff4444 100%);
+}
+
+.trending-button:hover {
+  filter: brightness(1.15);
+}
+
 /* Palette Options */
 .palette-options {
   display: flex;

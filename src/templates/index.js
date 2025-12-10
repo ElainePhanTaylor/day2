@@ -546,6 +546,151 @@ export const templates = [
       
       ctx.textAlign = 'center';
     }
+  },
+  {
+    id: 'trending',
+    name: 'Trending Now',
+    font: 'Space Grotesk',
+    fontWeight: 700,
+    fontSize: 36,
+    textAlign: 'center',
+    isTrending: true, // Special flag - no text input
+    palettes: [
+      { name: 'Viral', background: '#0f0f0f', accent: '#ff0050', text: '#ffffff' },
+      { name: 'Tech', background: '#0a192f', accent: '#64ffda', text: '#ffffff' },
+      { name: 'Bold', background: '#1a1a2e', accent: '#eab308', text: '#ffffff' },
+    ],
+    render: (ctx, text, palette, lotteryNumbers, astroData, trendingData) => {
+      const size = 1080;
+      const data = trendingData || { searches: ['Loading...'], powerWords: ['Trending'], timestamp: '', source: '' };
+      
+      // Dark gradient background
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, palette.background);
+      gradient.addColorStop(1, shadeColor(palette.background, -10));
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+      
+      // Animated-style lines in background
+      ctx.strokeStyle = palette.accent;
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.1;
+      for (let i = 0; i < 20; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, i * 60);
+        ctx.lineTo(size, i * 60 + 200);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      
+      // Header section
+      ctx.fillStyle = palette.accent;
+      ctx.font = `700 28px "Space Grotesk", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('📈 TRENDING NOW', size / 2, 70);
+      
+      // Timestamp
+      ctx.fillStyle = palette.text;
+      ctx.globalAlpha = 0.6;
+      ctx.font = `400 20px "Inter", sans-serif`;
+      ctx.fillText(data.source ? `${data.source} • Updated ${data.timestamp}` : '', size / 2, 110);
+      ctx.globalAlpha = 1;
+      
+      // Decorative line
+      ctx.strokeStyle = palette.accent;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(size * 0.15, 145);
+      ctx.lineTo(size * 0.85, 145);
+      ctx.stroke();
+      
+      // === TOP SEARCHES SECTION ===
+      ctx.fillStyle = palette.text;
+      ctx.font = `600 24px "Space Grotesk", sans-serif`;
+      ctx.textAlign = 'left';
+      ctx.fillText('🔥 TOP SEARCHES', 80, 200);
+      
+      // Search items
+      const searches = data.searches || [];
+      searches.forEach((search, i) => {
+        const y = 260 + i * 85;
+        
+        // Number badge
+        ctx.fillStyle = palette.accent;
+        ctx.beginPath();
+        ctx.roundRect(80, y - 25, 50, 50, 8);
+        ctx.fill();
+        
+        ctx.fillStyle = palette.background;
+        ctx.font = `700 28px "Space Grotesk", sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText(`${i + 1}`, 105, y + 5);
+        
+        // Search text
+        ctx.fillStyle = palette.text;
+        ctx.font = `600 32px "Inter", sans-serif`;
+        ctx.textAlign = 'left';
+        const displayText = search.length > 28 ? search.substring(0, 28) + '...' : search;
+        ctx.fillText(displayText, 150, y + 5);
+        
+        // Trend indicator
+        ctx.fillStyle = palette.accent;
+        ctx.font = `400 20px "Inter", sans-serif`;
+        ctx.textAlign = 'right';
+        ctx.fillText('trending ↗', size - 80, y + 5);
+        ctx.textAlign = 'left';
+      });
+      
+      // === POWER WORDS SECTION ===
+      const wordsY = 720;
+      ctx.fillStyle = palette.text;
+      ctx.font = `600 24px "Space Grotesk", sans-serif`;
+      ctx.textAlign = 'left';
+      ctx.fillText('⚡ POWER WORDS', 80, wordsY);
+      
+      // Power word tags
+      const powerWords = data.powerWords || [];
+      let tagX = 80;
+      const tagY = wordsY + 60;
+      
+      powerWords.forEach((word, i) => {
+        ctx.font = `600 28px "Inter", sans-serif`;
+        const metrics = ctx.measureText(word);
+        const tagWidth = metrics.width + 40;
+        
+        // Wrap to next line if needed
+        if (tagX + tagWidth > size - 80) {
+          tagX = 80;
+        }
+        
+        // Tag background
+        ctx.fillStyle = `${palette.accent}30`;
+        ctx.beginPath();
+        ctx.roundRect(tagX, tagY + Math.floor(i / 4) * 60 - 18, tagWidth, 45, 22);
+        ctx.fill();
+        
+        // Tag border
+        ctx.strokeStyle = palette.accent;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Tag text
+        ctx.fillStyle = palette.accent;
+        ctx.textAlign = 'center';
+        ctx.fillText(word, tagX + tagWidth / 2, tagY + Math.floor(i / 4) * 60 + 8);
+        
+        tagX += tagWidth + 15;
+      });
+      
+      // Footer
+      ctx.fillStyle = palette.text;
+      ctx.globalAlpha = 0.5;
+      ctx.font = `400 22px "Inter", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText('Stay ahead of the conversation', size / 2, size - 60);
+      ctx.globalAlpha = 1;
+    }
   }
 ];
 
@@ -987,6 +1132,66 @@ function drawPlanet(ctx, x, y, radius, planet, palette) {
   ctx.beginPath();
   ctx.ellipse(x - radius * 0.3, y - radius * 0.3, radius * 0.4, radius * 0.3, -Math.PI / 4, 0, Math.PI * 2);
   ctx.fill();
+}
+
+// Fetch trending data from Google Trends RSS
+export async function fetchTrendingData() {
+  try {
+    // Google Trends Daily RSS via rss2json proxy (no API key needed)
+    const response = await fetch(
+      'https://api.rss2json.com/v1/api.json?rss_url=https://trends.google.com/trending/rss?geo=US'
+    );
+    const data = await response.json();
+    
+    if (data.status === 'ok' && data.items) {
+      const searches = data.items.slice(0, 5).map(item => item.title);
+      return {
+        searches,
+        timestamp: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+        source: 'Google Trends'
+      };
+    }
+  } catch (error) {
+    console.log('Using fallback trending data');
+  }
+  
+  // Fallback trending data if fetch fails
+  return getFallbackTrending();
+}
+
+// Fallback trending data (curated)
+function getFallbackTrending() {
+  const trendingSets = [
+    ['AI Technology', 'Climate Action', 'Wellness Tips', 'Side Hustles', 'Mindfulness'],
+    ['Self Care', 'Crypto News', 'Fitness Goals', 'Remote Work', 'Mental Health'],
+    ['Manifestation', 'Sustainability', 'Productivity', 'Entrepreneurship', 'Healing'],
+  ];
+  const randomSet = trendingSets[Math.floor(Math.random() * trendingSets.length)];
+  
+  return {
+    searches: randomSet,
+    timestamp: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+    source: 'Trending Topics'
+  };
+}
+
+// Power words that trend on social media
+export function getPowerWords() {
+  const wordCategories = {
+    motivation: ['Manifest', 'Abundance', 'Growth', 'Transform', 'Elevate', 'Thrive'],
+    energy: ['Radiant', 'Powerful', 'Unstoppable', 'Magnetic', 'Fierce', 'Bold'],
+    wellness: ['Healing', 'Balance', 'Harmony', 'Mindful', 'Grounded', 'Centered'],
+    success: ['Winning', 'Crushing', 'Dominating', 'Achieving', 'Building', 'Creating'],
+  };
+  
+  // Pick random words from each category
+  const selected = [];
+  Object.values(wordCategories).forEach(words => {
+    const randomWord = words[Math.floor(Math.random() * words.length)];
+    selected.push(randomWord);
+  });
+  
+  return selected;
 }
 
 export default templates;

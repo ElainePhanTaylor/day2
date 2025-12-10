@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import Canvas from './Canvas';
-import { generateLotteryNumbers, getAstrologyData } from '../templates';
+import { generateLotteryNumbers, getAstrologyData, fetchTrendingData, getPowerWords } from '../templates';
 
 function Editor({ template, onBack }) {
   const [text, setText] = useState('');
@@ -9,10 +9,33 @@ function Editor({ template, onBack }) {
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [lotteryNumbers, setLotteryNumbers] = useState(() => generateLotteryNumbers());
   const [astroData, setAstroData] = useState(() => getAstrologyData());
+  const [trendingData, setTrendingData] = useState(null);
+  const [isLoadingTrends, setIsLoadingTrends] = useState(false);
   const canvasRef = useRef(null);
   
   const isLottery = template.isLottery;
   const isAstrology = template.isAstrology;
+  const isTrending = template.isTrending;
+  
+  // Fetch trending data on mount for trending template
+  useEffect(() => {
+    if (isTrending) {
+      loadTrendingData();
+    }
+  }, [isTrending]);
+  
+  const loadTrendingData = async () => {
+    setIsLoadingTrends(true);
+    try {
+      const data = await fetchTrendingData();
+      const powerWords = getPowerWords();
+      setTrendingData({ ...data, powerWords });
+    } catch (error) {
+      console.error('Failed to load trends:', error);
+    } finally {
+      setIsLoadingTrends(false);
+    }
+  };
   
   // Load fonts on mount
   useEffect(() => {
@@ -86,6 +109,7 @@ function Editor({ template, onBack }) {
           paletteIndex={paletteIndex}
           lotteryNumbers={isLottery ? lotteryNumbers : null}
           astroData={isAstrology ? astroData : null}
+          trendingData={isTrending ? trendingData : null}
         />
         
         <div className="controls">
@@ -141,19 +165,71 @@ function Editor({ template, onBack }) {
             </div>
           )}
           
-          <div className="control-group">
-            <label htmlFor="text-input" className="control-label">
-              {isLottery ? 'Title Text' : 'Your Text'}
-            </label>
-            <textarea
-              id="text-input"
-              className="text-input"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder={getPlaceholderText(template)}
-              rows={isLottery ? 1 : 3}
-            />
-          </div>
+          {isTrending && (
+            <div className="control-group">
+              <span className="control-label">Live Trending Data</span>
+              <div className="trending-display">
+                {isLoadingTrends ? (
+                  <div className="trending-loading">
+                    <span className="spinner"></span>
+                    <span>Fetching trends...</span>
+                  </div>
+                ) : trendingData ? (
+                  <>
+                    <div className="trending-header">
+                      <span className="trending-source">📈 {trendingData.source}</span>
+                      <span className="trending-time">Updated {trendingData.timestamp}</span>
+                    </div>
+                    <div className="trending-list">
+                      {trendingData.searches?.map((search, i) => (
+                        <div key={i} className="trending-item">
+                          <span className="trending-rank">{i + 1}</span>
+                          <span className="trending-text">{search}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="trending-words">
+                      <span className="control-label">Power Words</span>
+                      <div className="power-tags">
+                        {trendingData.powerWords?.map((word, i) => (
+                          <span key={i} className="power-tag">{word}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="trending-error">Unable to load trends</div>
+                )}
+              </div>
+              <button 
+                className="generate-button trending-button" 
+                onClick={loadTrendingData}
+                disabled={isLoadingTrends}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M23 4v6h-6M1 20v-6h6"/>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+                {isLoadingTrends ? 'Loading...' : 'Refresh Trends'}
+              </button>
+            </div>
+          )}
+          
+          {!isTrending && (
+            <div className="control-group">
+              <label htmlFor="text-input" className="control-label">
+                {isLottery ? 'Title Text' : isAstrology ? 'Title Text' : 'Your Text'}
+              </label>
+              <textarea
+                id="text-input"
+                className="text-input"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder={getPlaceholderText(template)}
+                rows={isLottery || isAstrology ? 1 : 3}
+              />
+            </div>
+          )}
           
           <div className="control-group">
             <span className="control-label">Color Palette</span>
