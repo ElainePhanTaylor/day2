@@ -333,39 +333,56 @@ export const templates = [
       }
       ctx.globalAlpha = 1;
       
-      // Title
-      ctx.fillStyle = palette.accent;
-      ctx.font = `700 56px "Space Grotesk", sans-serif`;
+      // === USER TEXT AT TOP ===
+      ctx.fillStyle = palette.text;
+      ctx.font = `700 52px "Space Grotesk", sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(text || '🍀 LUCKY NUMBERS 🍀', size / 2, 180);
       
-      // Decorative line under title
+      // Wrap user text if needed
+      const userText = text || '🍀 My Lucky Numbers 🍀';
+      const textLines = wrapText(ctx, userText, size - 120);
+      const lineHeight = 65;
+      const textStartY = 130;
+      
+      textLines.forEach((line, i) => {
+        ctx.fillText(line, size / 2, textStartY + i * lineHeight);
+      });
+      
+      // Decorative line under text
+      const textEndY = textStartY + (textLines.length - 1) * lineHeight + 50;
       ctx.strokeStyle = palette.accent;
       ctx.lineWidth = 3;
+      ctx.globalAlpha = 0.6;
       ctx.beginPath();
-      ctx.moveTo(size * 0.25, 240);
-      ctx.lineTo(size * 0.75, 240);
+      ctx.moveTo(size * 0.2, textEndY);
+      ctx.lineTo(size * 0.8, textEndY);
       ctx.stroke();
+      ctx.globalAlpha = 1;
       
-      // Draw lottery balls
+      // === LOTTERY BALLS (MIDDLE) ===
       const numbers = lotteryNumbers || generateLotteryNumbers();
-      const ballRadius = 75;
-      const ballY = size / 2 + 40;
-      const totalWidth = (numbers.length - 1) * (ballRadius * 2 + 20);
+      const ballRadius = 70;
+      const ballY = size * 0.42;
+      const totalWidth = (numbers.length - 1) * (ballRadius * 2 + 15);
       const startX = (size - totalWidth) / 2;
       
+      // "Today's Numbers" label
+      ctx.fillStyle = palette.accent;
+      ctx.font = `600 28px "Space Grotesk", sans-serif`;
+      ctx.fillText("TODAY'S NUMBERS", size / 2, ballY - 100);
+      
       numbers.forEach((num, i) => {
-        const x = startX + i * (ballRadius * 2 + 20);
+        const x = startX + i * (ballRadius * 2 + 15);
         
         // Ball shadow
         ctx.fillStyle = 'rgba(0,0,0,0.3)';
         ctx.beginPath();
-        ctx.arc(x + 5, ballY + 5, ballRadius, 0, Math.PI * 2);
+        ctx.arc(x + 4, ballY + 4, ballRadius, 0, Math.PI * 2);
         ctx.fill();
         
         // Ball gradient
-        const ballGradient = ctx.createRadialGradient(x - 20, ballY - 20, 0, x, ballY, ballRadius);
+        const ballGradient = ctx.createRadialGradient(x - 18, ballY - 18, 0, x, ballY, ballRadius);
         ballGradient.addColorStop(0, '#ffffff');
         ballGradient.addColorStop(0.3, palette.accent);
         ballGradient.addColorStop(1, shadeColor(palette.accent, -30));
@@ -381,37 +398,53 @@ export const templates = [
         
         // Number
         ctx.fillStyle = '#000000';
-        ctx.font = `700 64px "Space Grotesk", sans-serif`;
+        ctx.font = `700 56px "Space Grotesk", sans-serif`;
         ctx.fillText(num.toString().padStart(2, '0'), x, ballY + 5);
       });
       
-      // Powerball / Bonus (last number, different style)
+      // === BONUS NUMBER ===
       const bonusY = ballY + 200;
       ctx.fillStyle = palette.text;
-      ctx.font = `500 32px "Space Grotesk", sans-serif`;
-      ctx.fillText('BONUS NUMBER', size / 2, bonusY - 60);
+      ctx.font = `500 26px "Space Grotesk", sans-serif`;
+      ctx.fillText('BONUS NUMBER', size / 2, bonusY - 55);
       
       const bonusNum = Math.floor(Math.random() * 26) + 1;
       
       // Bonus ball
-      const bonusGradient = ctx.createRadialGradient(size/2 - 15, bonusY - 15, 0, size/2, bonusY, 55);
+      const bonusGradient = ctx.createRadialGradient(size/2 - 12, bonusY - 12, 0, size/2, bonusY, 50);
       bonusGradient.addColorStop(0, '#ffffff');
       bonusGradient.addColorStop(0.3, '#ff0000');
       bonusGradient.addColorStop(1, '#990000');
       ctx.fillStyle = bonusGradient;
       ctx.beginPath();
-      ctx.arc(size / 2, bonusY, 55, 0, Math.PI * 2);
+      ctx.arc(size / 2, bonusY, 50, 0, Math.PI * 2);
       ctx.fill();
       
       ctx.fillStyle = '#ffffff';
-      ctx.font = `700 48px "Space Grotesk", sans-serif`;
+      ctx.font = `700 42px "Space Grotesk", sans-serif`;
       ctx.fillText(bonusNum.toString().padStart(2, '0'), size / 2, bonusY + 5);
       
-      // Footer
+      // === FOOTER INFO BOX ===
+      const boxY = size - 180;
+      const boxHeight = 120;
+      const boxPadding = 60;
+      
+      ctx.fillStyle = `${palette.background}cc`;
+      ctx.fillRect(boxPadding, boxY, size - boxPadding * 2, boxHeight);
+      ctx.strokeStyle = palette.accent;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(boxPadding, boxY, size - boxPadding * 2, boxHeight);
+      
+      // Footer text
+      ctx.fillStyle = palette.accent;
+      ctx.font = `600 24px "Space Grotesk", sans-serif`;
+      ctx.fillText('🎰 Good Luck! 🎰', size / 2, boxY + 45);
+      
       ctx.fillStyle = palette.text;
-      ctx.globalAlpha = 0.6;
-      ctx.font = `400 28px "Inter", sans-serif`;
-      ctx.fillText('Good luck! 🎰', size / 2, size - 80);
+      ctx.globalAlpha = 0.7;
+      ctx.font = `400 20px "Inter", sans-serif`;
+      const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+      ctx.fillText(today, size / 2, boxY + 85);
       ctx.globalAlpha = 1;
     }
   },
