@@ -296,6 +296,124 @@ export const templates = [
         ctx.fillText(line, size / 2, startY + i * lineHeight);
       });
     }
+  },
+  {
+    id: 'lottery',
+    name: 'Lucky Numbers',
+    font: 'Space Grotesk',
+    fontWeight: 700,
+    fontSize: 48,
+    textAlign: 'center',
+    isLottery: true, // Special flag for lottery template
+    palettes: [
+      { name: 'Jackpot', background: '#1a1a2e', accent: '#ffd700', text: '#ffffff' },
+      { name: 'Lucky', background: '#0d4d0d', accent: '#00ff00', text: '#ffffff' },
+      { name: 'Fortune', background: '#4a0d0d', accent: '#ff4444', text: '#ffffff' },
+    ],
+    render: (ctx, text, palette, lotteryNumbers) => {
+      const size = 1080;
+      
+      // Dark gradient background
+      const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size * 0.7);
+      gradient.addColorStop(0, palette.background);
+      gradient.addColorStop(1, '#000000');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+      
+      // Sparkle effects
+      ctx.fillStyle = palette.accent;
+      for (let i = 0; i < 30; i++) {
+        ctx.globalAlpha = Math.random() * 0.5 + 0.2;
+        const x = Math.random() * size;
+        const y = Math.random() * size;
+        const starSize = Math.random() * 4 + 2;
+        ctx.beginPath();
+        ctx.arc(x, y, starSize, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      
+      // Title
+      ctx.fillStyle = palette.accent;
+      ctx.font = `700 56px "Space Grotesk", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text || '🍀 LUCKY NUMBERS 🍀', size / 2, 180);
+      
+      // Decorative line under title
+      ctx.strokeStyle = palette.accent;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(size * 0.25, 240);
+      ctx.lineTo(size * 0.75, 240);
+      ctx.stroke();
+      
+      // Draw lottery balls
+      const numbers = lotteryNumbers || generateLotteryNumbers();
+      const ballRadius = 75;
+      const ballY = size / 2 + 40;
+      const totalWidth = (numbers.length - 1) * (ballRadius * 2 + 20);
+      const startX = (size - totalWidth) / 2;
+      
+      numbers.forEach((num, i) => {
+        const x = startX + i * (ballRadius * 2 + 20);
+        
+        // Ball shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.beginPath();
+        ctx.arc(x + 5, ballY + 5, ballRadius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Ball gradient
+        const ballGradient = ctx.createRadialGradient(x - 20, ballY - 20, 0, x, ballY, ballRadius);
+        ballGradient.addColorStop(0, '#ffffff');
+        ballGradient.addColorStop(0.3, palette.accent);
+        ballGradient.addColorStop(1, shadeColor(palette.accent, -30));
+        ctx.fillStyle = ballGradient;
+        ctx.beginPath();
+        ctx.arc(x, ballY, ballRadius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Ball outline
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        
+        // Number
+        ctx.fillStyle = '#000000';
+        ctx.font = `700 64px "Space Grotesk", sans-serif`;
+        ctx.fillText(num.toString().padStart(2, '0'), x, ballY + 5);
+      });
+      
+      // Powerball / Bonus (last number, different style)
+      const bonusY = ballY + 200;
+      ctx.fillStyle = palette.text;
+      ctx.font = `500 32px "Space Grotesk", sans-serif`;
+      ctx.fillText('BONUS NUMBER', size / 2, bonusY - 60);
+      
+      const bonusNum = Math.floor(Math.random() * 26) + 1;
+      
+      // Bonus ball
+      const bonusGradient = ctx.createRadialGradient(size/2 - 15, bonusY - 15, 0, size/2, bonusY, 55);
+      bonusGradient.addColorStop(0, '#ffffff');
+      bonusGradient.addColorStop(0.3, '#ff0000');
+      bonusGradient.addColorStop(1, '#990000');
+      ctx.fillStyle = bonusGradient;
+      ctx.beginPath();
+      ctx.arc(size / 2, bonusY, 55, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `700 48px "Space Grotesk", sans-serif`;
+      ctx.fillText(bonusNum.toString().padStart(2, '0'), size / 2, bonusY + 5);
+      
+      // Footer
+      ctx.fillStyle = palette.text;
+      ctx.globalAlpha = 0.6;
+      ctx.font = `400 28px "Inter", sans-serif`;
+      ctx.fillText('Good luck! 🎰', size / 2, size - 80);
+      ctx.globalAlpha = 1;
+    }
   }
 ];
 
@@ -327,6 +445,33 @@ function wrapText(ctx, text, maxWidth) {
   });
   
   return allLines;
+}
+
+// Generate random lottery numbers (5 unique numbers from 1-69)
+export function generateLotteryNumbers() {
+  const numbers = [];
+  while (numbers.length < 5) {
+    const num = Math.floor(Math.random() * 69) + 1;
+    if (!numbers.includes(num)) {
+      numbers.push(num);
+    }
+  }
+  return numbers.sort((a, b) => a - b);
+}
+
+// Helper to darken/lighten a color
+function shadeColor(color, percent) {
+  const num = parseInt(color.replace('#', ''), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = (num >> 16) + amt;
+  const G = (num >> 8 & 0x00FF) + amt;
+  const B = (num & 0x0000FF) + amt;
+  return '#' + (
+    0x1000000 +
+    (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
+    (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
+    (B < 255 ? (B < 1 ? 0 : B) : 255)
+  ).toString(16).slice(1);
 }
 
 export default templates;

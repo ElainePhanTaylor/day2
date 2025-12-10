@@ -1,6 +1,6 @@
 import { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 
-const Canvas = forwardRef(({ template, text, paletteIndex }, ref) => {
+const Canvas = forwardRef(({ template, text, paletteIndex, lotteryNumbers }, ref) => {
   const canvasRef = useRef(null);
   const offscreenRef = useRef(null);
   
@@ -35,7 +35,7 @@ const Canvas = forwardRef(({ template, text, paletteIndex }, ref) => {
     // Clear and render to offscreen at full resolution
     offCtx.clearRect(0, 0, 1080, 1080);
     offCtx.save();
-    template.render(offCtx, text, palette);
+    template.render(offCtx, text, palette, lotteryNumbers);
     offCtx.restore();
     
     // Draw scaled version to display canvas
@@ -43,7 +43,7 @@ const Canvas = forwardRef(({ template, text, paletteIndex }, ref) => {
     ctx.clearRect(0, 0, displaySize, displaySize);
     ctx.drawImage(offscreen, 0, 0, displaySize, displaySize);
     
-  }, [template, text, paletteIndex]);
+  }, [template, text, paletteIndex, lotteryNumbers]);
   
   // Handle canvas sizing for display
   useEffect(() => {

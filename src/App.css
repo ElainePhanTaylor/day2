@@ -273,6 +273,66 @@ body {
   color: var(--text-muted);
 }
 
+/* Lottery Styles */
+.lottery-display {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: center;
+  padding: var(--spacing-md) 0;
+}
+
+.lottery-ball {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+  border-radius: 50%;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #1a1a1a;
+  box-shadow: var(--shadow-md), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.generate-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+  padding: var(--spacing-md);
+  background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+  border: none;
+  border-radius: var(--radius-md);
+  color: #1a1a1a;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.generate-button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  filter: brightness(1.1);
+}
+
+.generate-button:active {
+  transform: translateY(0);
+}
+
+.generate-button svg {
+  transition: transform 0.3s ease;
+}
+
+.generate-button:hover svg {
+  transform: rotate(180deg);
+}
+
 /* Palette Options */
 .palette-options {
   display: flex;

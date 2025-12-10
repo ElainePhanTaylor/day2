@@ -1,17 +1,25 @@
 import { useState, useRef, useEffect } from 'react';
 import Canvas from './Canvas';
+import { generateLotteryNumbers } from '../templates';
 
 function Editor({ template, onBack }) {
   const [text, setText] = useState('');
   const [paletteIndex, setPaletteIndex] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
+  const [lotteryNumbers, setLotteryNumbers] = useState(() => generateLotteryNumbers());
   const canvasRef = useRef(null);
+  
+  const isLottery = template.isLottery;
   
   // Load fonts on mount
   useEffect(() => {
     loadFonts();
   }, []);
+  
+  const handleGenerateNumbers = () => {
+    setLotteryNumbers(generateLotteryNumbers());
+  };
   
   const handleDownload = async () => {
     if (!canvasRef.current) return;
@@ -74,18 +82,39 @@ function Editor({ template, onBack }) {
           template={template}
           text={displayText}
           paletteIndex={paletteIndex}
+          lotteryNumbers={isLottery ? lotteryNumbers : null}
         />
         
         <div className="controls">
+          {isLottery && (
+            <div className="control-group">
+              <span className="control-label">Lucky Numbers</span>
+              <div className="lottery-display">
+                {lotteryNumbers.map((num, i) => (
+                  <span key={i} className="lottery-ball">{num}</span>
+                ))}
+              </div>
+              <button className="generate-button" onClick={handleGenerateNumbers}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M23 4v6h-6M1 20v-6h6"/>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+                Generate New Numbers
+              </button>
+            </div>
+          )}
+          
           <div className="control-group">
-            <label htmlFor="text-input" className="control-label">Your Text</label>
+            <label htmlFor="text-input" className="control-label">
+              {isLottery ? 'Title Text' : 'Your Text'}
+            </label>
             <textarea
               id="text-input"
               className="text-input"
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder={getPlaceholderText(template)}
-              rows={3}
+              rows={isLottery ? 1 : 3}
             />
           </div>
           
@@ -159,6 +188,7 @@ function getPlaceholderText(template) {
     'split': 'Your message\ngoes here\nwith style',
     'frame': 'Elegance\nin every\ndetail',
     'modern-serif': 'Beautiful\nthings await',
+    'lottery': '🍀 LUCKY NUMBERS 🍀',
   };
   return placeholders[template.id] || 'Your text here';
 }
@@ -186,4 +216,3 @@ function isMobile() {
 }
 
 export default Editor;
-
