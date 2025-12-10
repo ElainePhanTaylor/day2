@@ -414,6 +414,119 @@ export const templates = [
       ctx.fillText('Good luck! 🎰', size / 2, size - 80);
       ctx.globalAlpha = 1;
     }
+  },
+  {
+    id: 'astrology',
+    name: 'Cosmic Vibes',
+    font: 'Playfair Display',
+    fontWeight: 400,
+    fontSize: 48,
+    textAlign: 'center',
+    isAstrology: true, // Special flag for astrology template
+    palettes: [
+      { name: 'Midnight', background: '#0f0f23', accent: '#c9b037', text: '#ffffff' },
+      { name: 'Mystic', background: '#1a0a2e', accent: '#9d4edd', text: '#ffffff' },
+      { name: 'Celestial', background: '#0a1628', accent: '#64b5f6', text: '#ffffff' },
+    ],
+    render: (ctx, text, palette, lotteryNumbers, astroData) => {
+      const size = 1080;
+      const data = astroData || getAstrologyData();
+      
+      // Deep space gradient background
+      const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size * 0.8);
+      gradient.addColorStop(0, shadeColor(palette.background, 20));
+      gradient.addColorStop(1, palette.background);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+      
+      // Stars background
+      ctx.fillStyle = '#ffffff';
+      for (let i = 0; i < 100; i++) {
+        ctx.globalAlpha = Math.random() * 0.8 + 0.2;
+        const x = Math.random() * size;
+        const y = Math.random() * size;
+        const starSize = Math.random() * 2 + 0.5;
+        ctx.beginPath();
+        ctx.arc(x, y, starSize, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      
+      // Title text
+      ctx.fillStyle = palette.text;
+      ctx.font = `400 italic 52px "Playfair Display", serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text || '✨ Daily Cosmic Energy ✨', size / 2, 120);
+      
+      // Decorative line
+      ctx.strokeStyle = palette.accent;
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(size * 0.2, 180);
+      ctx.lineTo(size * 0.8, 180);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      
+      // Draw moon phase in center
+      const moonY = size * 0.38;
+      const moonRadius = 120;
+      
+      // Moon glow
+      const glowGradient = ctx.createRadialGradient(size/2, moonY, moonRadius * 0.8, size/2, moonY, moonRadius * 2);
+      glowGradient.addColorStop(0, `${palette.accent}40`);
+      glowGradient.addColorStop(1, 'transparent');
+      ctx.fillStyle = glowGradient;
+      ctx.beginPath();
+      ctx.arc(size/2, moonY, moonRadius * 2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Draw the moon based on phase
+      drawMoon(ctx, size/2, moonY, moonRadius, data.phaseValue, palette);
+      
+      // Moon phase name
+      ctx.fillStyle = palette.accent;
+      ctx.font = `700 42px "Space Grotesk", sans-serif`;
+      ctx.fillText(data.moonPhase, size / 2, moonY + moonRadius + 60);
+      
+      // Moon sign
+      ctx.fillStyle = palette.text;
+      ctx.font = `400 32px "Inter", sans-serif`;
+      ctx.fillText(`Moon in ${data.moonSign}`, size / 2, moonY + moonRadius + 110);
+      
+      // Astrological info box at bottom
+      const boxY = size - 280;
+      const boxHeight = 200;
+      const boxPadding = 60;
+      
+      // Semi-transparent box
+      ctx.fillStyle = `${palette.background}cc`;
+      ctx.fillRect(boxPadding, boxY, size - boxPadding * 2, boxHeight);
+      ctx.strokeStyle = palette.accent;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(boxPadding, boxY, size - boxPadding * 2, boxHeight);
+      
+      // Astrological details
+      ctx.fillStyle = palette.accent;
+      ctx.font = `600 24px "Space Grotesk", sans-serif`;
+      ctx.textAlign = 'left';
+      ctx.fillText('CURRENT ALIGNMENTS', boxPadding + 30, boxY + 40);
+      
+      ctx.fillStyle = palette.text;
+      ctx.font = `400 26px "Inter", sans-serif`;
+      ctx.fillText(`☉ Sun in ${data.sunSign}`, boxPadding + 30, boxY + 85);
+      ctx.fillText(`☿ Mercury ${data.mercuryStatus}`, boxPadding + 30, boxY + 125);
+      ctx.fillText(`♀ Venus in ${data.venusSign}`, boxPadding + 30, boxY + 165);
+      
+      // Right column
+      ctx.textAlign = 'right';
+      ctx.fillText(`${data.element} Energy`, size - boxPadding - 30, boxY + 85);
+      ctx.fillText(`${data.quality} Moon`, size - boxPadding - 30, boxY + 125);
+      ctx.fillText(data.date, size - boxPadding - 30, boxY + 165);
+      
+      ctx.textAlign = 'center';
+    }
   }
 ];
 
@@ -472,6 +585,168 @@ function shadeColor(color, percent) {
     (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
     (B < 255 ? (B < 1 ? 0 : B) : 255)
   ).toString(16).slice(1);
+}
+
+// Calculate moon phase and astrological data
+export function getAstrologyData(date = new Date()) {
+  // Moon phase calculation (simplified lunation)
+  const lunarCycle = 29.53059; // days
+  const knownNewMoon = new Date('2024-01-11'); // Known new moon date
+  const daysSinceNew = (date - knownNewMoon) / (1000 * 60 * 60 * 24);
+  const lunarAge = ((daysSinceNew % lunarCycle) + lunarCycle) % lunarCycle;
+  const phaseValue = lunarAge / lunarCycle; // 0 to 1
+  
+  // Determine moon phase name
+  let moonPhase;
+  if (phaseValue < 0.025 || phaseValue >= 0.975) {
+    moonPhase = '🌑 New Moon';
+  } else if (phaseValue < 0.225) {
+    moonPhase = '🌒 Waxing Crescent';
+  } else if (phaseValue < 0.275) {
+    moonPhase = '🌓 First Quarter';
+  } else if (phaseValue < 0.475) {
+    moonPhase = '🌔 Waxing Gibbous';
+  } else if (phaseValue < 0.525) {
+    moonPhase = '🌕 Full Moon';
+  } else if (phaseValue < 0.725) {
+    moonPhase = '🌖 Waning Gibbous';
+  } else if (phaseValue < 0.775) {
+    moonPhase = '🌗 Last Quarter';
+  } else {
+    moonPhase = '🌘 Waning Crescent';
+  }
+  
+  // Zodiac signs (simplified calculation based on moon's ~27.3 day cycle through zodiac)
+  const zodiacSigns = [
+    'Aries ♈', 'Taurus ♉', 'Gemini ♊', 'Cancer ♋', 
+    'Leo ♌', 'Virgo ♍', 'Libra ♎', 'Scorpio ♏',
+    'Sagittarius ♐', 'Capricorn ♑', 'Aquarius ♒', 'Pisces ♓'
+  ];
+  
+  const elements = ['Fire 🔥', 'Earth 🌍', 'Air 💨', 'Water 💧'];
+  const qualities = ['Cardinal', 'Fixed', 'Mutable'];
+  
+  // Moon sign (changes every ~2.5 days)
+  const moonCycleDays = 27.3;
+  const moonSignIndex = Math.floor(((daysSinceNew % moonCycleDays) / moonCycleDays) * 12) % 12;
+  const moonSign = zodiacSigns[moonSignIndex];
+  
+  // Sun sign (based on date)
+  const sunSignIndex = getSunSign(date);
+  const sunSign = zodiacSigns[sunSignIndex];
+  
+  // Element and quality based on moon sign
+  const element = elements[moonSignIndex % 4];
+  const quality = qualities[moonSignIndex % 3];
+  
+  // Venus sign (simplified - moves through zodiac roughly monthly)
+  const venusIndex = (sunSignIndex + Math.floor(date.getDate() / 10)) % 12;
+  const venusSign = zodiacSigns[venusIndex];
+  
+  // Mercury retrograde check (simplified - happens ~3-4 times per year)
+  const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+  const mercuryRetrograde = (dayOfYear % 88) < 21; // Rough approximation
+  const mercuryStatus = mercuryRetrograde ? 'Retrograde ℞' : `in ${zodiacSigns[(sunSignIndex + 1) % 12]}`;
+  
+  // Format date
+  const dateStr = date.toLocaleDateString('en-US', { 
+    month: 'long', 
+    day: 'numeric', 
+    year: 'numeric' 
+  });
+  
+  return {
+    moonPhase,
+    phaseValue,
+    moonSign,
+    sunSign,
+    venusSign,
+    mercuryStatus,
+    element,
+    quality,
+    date: dateStr
+  };
+}
+
+// Get sun sign based on date
+function getSunSign(date) {
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  
+  const signDates = [
+    { sign: 9, start: [1, 20] },   // Capricorn until Jan 19
+    { sign: 10, start: [1, 20] },  // Aquarius Jan 20
+    { sign: 11, start: [2, 19] },  // Pisces Feb 19
+    { sign: 0, start: [3, 21] },   // Aries Mar 21
+    { sign: 1, start: [4, 20] },   // Taurus Apr 20
+    { sign: 2, start: [5, 21] },   // Gemini May 21
+    { sign: 3, start: [6, 21] },   // Cancer Jun 21
+    { sign: 4, start: [7, 23] },   // Leo Jul 23
+    { sign: 5, start: [8, 23] },   // Virgo Aug 23
+    { sign: 6, start: [9, 23] },   // Libra Sep 23
+    { sign: 7, start: [10, 23] },  // Scorpio Oct 23
+    { sign: 8, start: [11, 22] },  // Sagittarius Nov 22
+    { sign: 9, start: [12, 22] },  // Capricorn Dec 22
+  ];
+  
+  for (let i = signDates.length - 1; i >= 0; i--) {
+    const [startMonth, startDay] = signDates[i].start;
+    if (month > startMonth || (month === startMonth && day >= startDay)) {
+      return signDates[i].sign;
+    }
+  }
+  return 9; // Capricorn (default for early January)
+}
+
+// Draw moon with phase
+function drawMoon(ctx, x, y, radius, phaseValue, palette) {
+  // Draw full moon base
+  ctx.fillStyle = '#f4f4f4';
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Add some crater texture
+  ctx.fillStyle = '#e0e0e0';
+  ctx.globalAlpha = 0.5;
+  ctx.beginPath();
+  ctx.arc(x - radius * 0.3, y - radius * 0.2, radius * 0.15, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x + radius * 0.4, y + radius * 0.3, radius * 0.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x - radius * 0.1, y + radius * 0.5, radius * 0.12, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  
+  // Draw shadow based on phase
+  ctx.fillStyle = palette.background;
+  
+  if (phaseValue < 0.5) {
+    // Waxing: shadow on left, shrinking
+    const shadowWidth = radius * 2 * (0.5 - phaseValue) * 2;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, Math.PI * 0.5, Math.PI * 1.5);
+    ctx.ellipse(x, y, shadowWidth / 2, radius, 0, Math.PI * 1.5, Math.PI * 0.5);
+    ctx.fill();
+  } else {
+    // Waning: shadow on right, growing
+    const shadowWidth = radius * 2 * (phaseValue - 0.5) * 2;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, Math.PI * 1.5, Math.PI * 0.5);
+    ctx.ellipse(x, y, shadowWidth / 2, radius, 0, Math.PI * 0.5, Math.PI * 1.5);
+    ctx.fill();
+  }
+  
+  // Moon outline glow
+  ctx.strokeStyle = palette.accent;
+  ctx.lineWidth = 2;
+  ctx.globalAlpha = 0.6;
+  ctx.beginPath();
+  ctx.arc(x, y, radius + 3, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.globalAlpha = 1;
 }
 
 export default templates;

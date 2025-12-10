@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import Canvas from './Canvas';
-import { generateLotteryNumbers } from '../templates';
+import { generateLotteryNumbers, getAstrologyData } from '../templates';
 
 function Editor({ template, onBack }) {
   const [text, setText] = useState('');
@@ -8,9 +8,11 @@ function Editor({ template, onBack }) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [lotteryNumbers, setLotteryNumbers] = useState(() => generateLotteryNumbers());
+  const [astroData, setAstroData] = useState(() => getAstrologyData());
   const canvasRef = useRef(null);
   
   const isLottery = template.isLottery;
+  const isAstrology = template.isAstrology;
   
   // Load fonts on mount
   useEffect(() => {
@@ -83,6 +85,7 @@ function Editor({ template, onBack }) {
           text={displayText}
           paletteIndex={paletteIndex}
           lotteryNumbers={isLottery ? lotteryNumbers : null}
+          astroData={isAstrology ? astroData : null}
         />
         
         <div className="controls">
@@ -100,6 +103,29 @@ function Editor({ template, onBack }) {
                   <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
                 </svg>
                 Generate New Numbers
+              </button>
+            </div>
+          )}
+          
+          {isAstrology && (
+            <div className="control-group">
+              <span className="control-label">Current Cosmic Energy</span>
+              <div className="astro-display">
+                <div className="astro-main">
+                  <span className="astro-phase">{astroData.moonPhase}</span>
+                  <span className="astro-sign">Moon in {astroData.moonSign}</span>
+                </div>
+                <div className="astro-details">
+                  <span>☉ Sun in {astroData.sunSign}</span>
+                  <span>☿ Mercury {astroData.mercuryStatus}</span>
+                </div>
+              </div>
+              <button className="generate-button astro-button" onClick={() => setAstroData(getAstrologyData())}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 2a4.5 4.5 0 0 0 0 9 4.5 4.5 0 0 1 0 9"/>
+                </svg>
+                Refresh Cosmic Data
               </button>
             </div>
           )}
@@ -189,6 +215,7 @@ function getPlaceholderText(template) {
     'frame': 'Elegance\nin every\ndetail',
     'modern-serif': 'Beautiful\nthings await',
     'lottery': '🍀 LUCKY NUMBERS 🍀',
+    'astrology': '✨ Daily Cosmic Energy ✨',
   };
   return placeholders[template.id] || 'Your text here';
 }
